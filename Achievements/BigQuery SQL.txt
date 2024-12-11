@@ -1,0 +1,1495 @@
+-- Tim : Lucky Star
+
+WITH query_1 AS (
+  WITH holiday_info AS (
+    SELECT
+      DATE(PARSE_DATE('%Y%m%d', CAST(BAS_DT AS STRING))) AS holiday_date,
+      NAT_HLDY_DSCD AS is_holiday
+    FROM
+      `focal-eon-426807-s6.lomba.Ref_HariLibur`
+    WHERE
+      NAT_HLDY_DSCD = 1  -- Hanya hari libur
+    ),
+    balance_info AS (
+    SELECT
+      s.date AS transaction_date,
+      s.gl_acc AS coa,
+      s.equivalent_amount AS transaction_amount
+    FROM
+      `focal-eon-426807-s6.lomba.daily_summary_gl_balance` s
+    JOIN
+      `focal-eon-426807-s6.lomba.ref_proyeksi_funding_list_gl` p
+    ON
+      s.gl_acc = p.COA  -- Menggabungkan dengan COA dari proyeksi funding list
+    WHERE
+      p.TAG = 'Giro'  -- Filter untuk akun Giro
+    ),
+    working_day_balance AS (
+    SELECT
+      bi.transaction_date,
+      SUM(ABS(bi.transaction_amount)) AS total_balance
+    FROM
+      balance_info bi
+    LEFT JOIN
+      holiday_info hi ON bi.transaction_date = hi.holiday_date
+    WHERE
+      hi.holiday_date IS NULL  -- Mengambil hanya transaksi pada hari kerja
+    GROUP BY
+      bi.transaction_date
+    ),
+    balance_by_day AS (
+    SELECT
+      wd.transaction_date,
+      COALESCE(SUM(ABS(bi.transaction_amount)), 0) AS total_balance
+    FROM
+      working_day_balance wd
+    LEFT JOIN
+      balance_info bi ON bi.transaction_date = wd.transaction_date
+    GROUP BY
+      wd.transaction_date
+    )
+    SELECT
+    1 AS `No`,
+    '02.01.00.00.00.00' AS Ref,  -- Ref tetap seperti yang diinginkan
+    'Giro' AS Pos,  -- Pos tetap Giro
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = CURRENT_DATE()), 0) AS `H`,
+    'Arus Kas Masuk' AS `Arus Kas Masuk atau Keluar`,
+    'I' AS ` `,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 1 DAY)), 0) AS `H+1`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 2 DAY)), 0) AS `H+2`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 3 DAY)), 0) AS `H+3`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 4 DAY)), 0) AS `H+4`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 5 DAY)), 0) AS `H+5`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 6 DAY)), 0) AS `H+6`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 7 DAY)), 0) AS `H+7`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 8 DAY)), 0) AS `H+8`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 9 DAY)), 0) AS `H+9`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 10 DAY)), 0) AS `H+10`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 11 DAY)), 0) AS `H+11`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 12 DAY)), 0) AS `H+12`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 13 DAY)), 0) AS `H+13`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 14 DAY)), 0) AS `H+14`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 15 DAY)), 0) AS `H+15`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 16 DAY)), 0) AS `H+16`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 17 DAY)), 0) AS `H+17`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 18 DAY)), 0) AS `H+18`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 19 DAY)), 0) AS `H+19`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 20 DAY)), 0) AS `H+20`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 21 DAY)), 0) AS `H+21`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 22 DAY)), 0) AS `H+22`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 23 DAY)), 0) AS `H+23`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 24 DAY)), 0) AS `H+24`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 25 DAY)), 0) AS `H+25`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 26 DAY)), 0) AS `H+26`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 27 DAY)), 0) AS `H+27`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 28 DAY)), 0) AS `H+28`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 29 DAY)), 0) AS `H+29`,
+    COALESCE((SELECT total_balance FROM balance_by_day WHERE transaction_date = DATE_ADD(CURRENT_DATE(), INTERVAL 30 DAY)), 0) AS `H+30`
+
+
+    UNION ALL
+    SELECT
+    2 AS `No`,
+    '02.01.00.00.00.00' AS Ref,  -- Ref tetap sama seperti yang diinginkan
+    'Giro' AS Pos,  -- Pos tetap Giro
+    0 AS `H`,  -- Nilai H untuk baris 2 adalah 0
+    'Arus Kas Keluar' AS `Arus Kas Masuk atau Keluar`,
+    'O' AS ` `,
+    0 AS `H+1`,  -- Nilai H+1 hingga H+30 semuanya 0
+    0 AS `H+2`,
+    0 AS `H+3`,
+    0 AS `H+4`,
+    0 AS `H+5`,
+    0 AS `H+6`,
+    0 AS `H+7`,
+    0 AS `H+8`,
+    0 AS `H+9`,
+    0 AS `H+10`,
+    0 AS `H+11`,
+    0 AS `H+12`,
+    0 AS `H+13`,
+    0 AS `H+14`,
+    0 AS `H+15`,
+    0 AS `H+16`,
+    0 AS `H+17`,
+    0 AS `H+18`,
+    0 AS `H+19`,
+    0 AS `H+20`,
+    0 AS `H+21`,
+    0 AS `H+22`,
+    0 AS `H+23`,
+    0 AS `H+24`,
+    0 AS `H+25`,
+    0 AS `H+26`,
+    0 AS `H+27`,
+    0 AS `H+28`,
+    0 AS `H+29`,
+    0 AS `H+30`
+
+
+    ORDER BY 1
+),
+query_2 AS (
+  WITH WorkingDays AS (
+    SELECT 
+      PARSE_DATE('%Y%m%d', CAST(BAS_DT AS STRING)) AS BAS_DT,
+      NAT_HLDY_DSCD
+    FROM 
+      focal-eon-426807-s6.lomba.Ref_HariLibur
+    WHERE 
+      NAT_HLDY_DSCD = 0  -- 0 indicates a working day
+  ),
+
+  CurrentDayCashFlow AS (
+    SELECT 
+      '02.02.00.00.00.00' AS Ref,
+      'Tabungan' AS Pos,
+      ABS(SUM(dsgb.equivalent_amount)) AS H
+    FROM 
+      focal-eon-426807-s6.lomba.daily_summary_gl_balance dsgb
+    JOIN 
+      focal-eon-426807-s6.lomba.ref_proyeksi_funding_list_gl pfl
+    ON 
+      dsgb.gl_acc = pfl.COA
+    WHERE 
+      pfl.TAG = 'Tabungan'
+  ),
+
+  FutureProjections AS (
+    SELECT 
+      dep.id,
+      -- Arus Kas Masuk (arus_kas = 1)
+      SUM(CASE 
+            WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 1
+                AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY))
+            THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+            ELSE 0 
+          END) AS H1,
+          
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 2
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 2 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H2,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 3
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H3,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 4
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H4,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 5
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H5,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 6
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H6,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 7
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H7,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 8
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H8,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 9
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H9,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 10
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H10,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 11
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H11,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 12
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H12,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 13
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H13,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 14
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H14,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 15
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H15,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 16
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H16,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 17
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H17,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 18
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H18,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 19
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H19,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 20
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H20,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 21
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H21,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 22
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H22,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 23
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H23,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 24
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H24,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 25
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H25,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 26
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H26,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 27
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H27,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 28
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H28,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 29
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H29,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 30
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H30,
+
+      -- Arus Kas Keluar (arus_kas = 0)
+      SUM(CASE 
+            WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY) <= CURRENT_DATE('Asia/Jakarta') + 1
+                AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY)
+                AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY))
+            THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+            ELSE 0 
+          END) AS H1_out,
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 2 DAY) <= CURRENT_DATE('Asia/Jakarta') + 2
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 2 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 2 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H2_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY) <= CURRENT_DATE('Asia/Jakarta') + 3
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H3_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY) <= CURRENT_DATE('Asia/Jakarta') + 4
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H4_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY) <= CURRENT_DATE('Asia/Jakarta') + 5
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H5_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY) <= CURRENT_DATE('Asia/Jakarta') + 6
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H6_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY) <= CURRENT_DATE('Asia/Jakarta') + 7
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H7_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY) <= CURRENT_DATE('Asia/Jakarta') + 8
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H8_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY) <= CURRENT_DATE('Asia/Jakarta') + 9
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H9_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY) <= CURRENT_DATE('Asia/Jakarta') + 10
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H10_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY) <= CURRENT_DATE('Asia/Jakarta') + 11
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H11_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY) <= CURRENT_DATE('Asia/Jakarta') + 12
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H12_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY) <= CURRENT_DATE('Asia/Jakarta') + 13
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H13_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY) <= CURRENT_DATE('Asia/Jakarta') + 14
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H14_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY) <= CURRENT_DATE('Asia/Jakarta') + 15
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H15_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY) <= CURRENT_DATE('Asia/Jakarta') + 16
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H16_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY) <= CURRENT_DATE('Asia/Jakarta') + 17
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H17_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY) <= CURRENT_DATE('Asia/Jakarta') + 18
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H18_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY) <= CURRENT_DATE('Asia/Jakarta') + 19
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H19_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY) <= CURRENT_DATE('Asia/Jakarta') + 20
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H20_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY) <= CURRENT_DATE('Asia/Jakarta') + 21
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H21_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY) <= CURRENT_DATE('Asia/Jakarta') + 22
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H22_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY) <= CURRENT_DATE('Asia/Jakarta') + 23
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H23_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY) <= CURRENT_DATE('Asia/Jakarta') + 24
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H24_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY) <= CURRENT_DATE('Asia/Jakarta') + 25
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H25_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY) <= CURRENT_DATE('Asia/Jakarta') + 26
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H26_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY) <= CURRENT_DATE('Asia/Jakarta') + 27
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H27_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY) <= CURRENT_DATE('Asia/Jakarta') + 28
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H28_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY) <= CURRENT_DATE('Asia/Jakarta') + 29
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H29_out,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                    AND DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY) <= CURRENT_DATE('Asia/Jakarta') + 30
+                    AND dep._OTHERINFORMATION_GOALTANGGALTARGET = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY))
+                THEN dep._OTHERINFORMATION_GOALNOMINALTARGET
+                ELSE 0 
+              END) AS H30_out
+
+    FROM 
+      focal-eon-426807-s6.lomba.deposits dep
+    GROUP BY dep.id
+  )
+
+  -- Use ROW_NUMBER to select only one row for each cash flow type
+  SELECT 
+      `No`,
+      Ref,
+      Pos,
+      H,
+      ArusKas,
+      ` `,
+      `H+1`, `H+2`, `H+3`, `H+4`, `H+5`, `H+6`, `H+7`, `H+8`, 
+      `H+9`, `H+10`, `H+11`, `H+12`, `H+13`, `H+14`, `H+15`, `H+16`,
+      `H+17`, `H+18`, `H+19`, `H+20`, `H+21`, `H+22`, `H+23`, `H+24`,
+      `H+25`, `H+26`, `H+27`, `H+28`, `H+29`, `H+30`
+  FROM (
+      SELECT
+          3 AS `No`, 
+          cdcf.Ref,
+          cdcf.Pos,
+          cdcf.H,
+          'Arus Kas Masuk' AS ArusKas,
+          'I' AS ` `,
+          COALESCE(NULLIF(fp.H1, 0), cdcf.H) AS `H+1`,
+          COALESCE(NULLIF(fp.H2, 0), cdcf.H) AS `H+2`,
+          COALESCE(NULLIF(fp.H3, 0), cdcf.H) AS `H+3`,
+          COALESCE(NULLIF(fp.H4, 0), cdcf.H) AS `H+4`,
+          COALESCE(NULLIF(fp.H5, 0), cdcf.H) AS `H+5`,
+          COALESCE(NULLIF(fp.H6, 0), cdcf.H) AS `H+6`,
+          COALESCE(NULLIF(fp.H7, 0), cdcf.H) AS `H+7`,
+          COALESCE(NULLIF(fp.H8, 0), cdcf.H) AS `H+8`,
+          COALESCE(NULLIF(fp.H9, 0), cdcf.H) AS `H+9`,
+          COALESCE(NULLIF(fp.H10, 0), cdcf.H) AS `H+10`,
+          COALESCE(NULLIF(fp.H11, 0), cdcf.H) AS `H+11`,
+          COALESCE(NULLIF(fp.H12, 0), cdcf.H) AS `H+12`,
+          COALESCE(NULLIF(fp.H13, 0), cdcf.H) AS `H+13`,
+          COALESCE(NULLIF(fp.H14, 0), cdcf.H) AS `H+14`,
+          COALESCE(NULLIF(fp.H15, 0), cdcf.H) AS `H+15`,
+          COALESCE(NULLIF(fp.H16, 0), cdcf.H) AS `H+16`,
+          COALESCE(NULLIF(fp.H17, 0), cdcf.H) AS `H+17`,
+          COALESCE(NULLIF(fp.H18, 0), cdcf.H) AS `H+18`,
+          COALESCE(NULLIF(fp.H19, 0), cdcf.H) AS `H+19`,
+          COALESCE(NULLIF(fp.H20, 0), cdcf.H) AS `H+20`,
+          COALESCE(NULLIF(fp.H21, 0), cdcf.H) AS `H+21`,
+          COALESCE(NULLIF(fp.H22, 0), cdcf.H) AS `H+22`,
+          COALESCE(NULLIF(fp.H23, 0), cdcf.H) AS `H+23`,
+          COALESCE(NULLIF(fp.H24, 0), cdcf.H) AS `H+24`,
+          COALESCE(NULLIF(fp.H25, 0), cdcf.H) AS `H+25`,
+          COALESCE(NULLIF(fp.H26, 0), cdcf.H) AS `H+26`,
+          COALESCE(NULLIF(fp.H27, 0), cdcf.H) AS `H+27`,
+          COALESCE(NULLIF(fp.H28, 0), cdcf.H) AS `H+28`,
+          COALESCE(NULLIF(fp.H29, 0), cdcf.H) AS `H+29`,
+          COALESCE(NULLIF(fp.H30, 0), cdcf.H) AS `H+30`,
+          ROW_NUMBER() OVER() AS row_num
+      FROM 
+          CurrentDayCashFlow cdcf
+      LEFT JOIN 
+          FutureProjections fp ON TRUE
+  )
+  WHERE row_num = 1
+
+  UNION ALL
+
+  SELECT 
+      `No`,
+      Ref,
+      Pos,
+      H,
+      ArusKas,
+      ` `,
+      `H+1`, `H+2`, `H+3`, `H+4`, `H+5`, `H+6`, `H+7`, `H+8`, 
+      `H+9`, `H+10`, `H+11`, `H+12`, `H+13`, `H+14`, `H+15`, `H+16`,
+      `H+17`, `H+18`, `H+19`, `H+20`, `H+21`, `H+22`, `H+23`, `H+24`,
+      `H+25`, `H+26`, `H+27`, `H+28`, `H+29`, `H+30`
+  FROM (
+      SELECT 
+          4 AS `No`,
+          cdcf.Ref,
+          cdcf.Pos,
+          0 AS H,  -- Set H to 0 for "Arus Kas Keluar"
+          'Arus Kas Keluar' AS ArusKas,
+          'O' AS ` `,
+          COALESCE(NULLIF(fp.H1_out, 0), 0) AS `H+1`,
+          COALESCE(NULLIF(fp.H2_out, 0), 0) AS `H+2`,
+          COALESCE(NULLIF(fp.H3_out, 0), 0) AS `H+3`,
+          COALESCE(NULLIF(fp.H4_out, 0), 0) AS `H+4`,
+          COALESCE(NULLIF(fp.H5_out, 0), 0) AS `H+5`,
+          COALESCE(NULLIF(fp.H6_out, 0), 0) AS `H+6`,
+          COALESCE(NULLIF(fp.H7_out, 0), 0) AS `H+7`,
+          COALESCE(NULLIF(fp.H8_out, 0), 0) AS `H+8`,
+          COALESCE(NULLIF(fp.H9_out, 0), 0) AS `H+9`,
+          COALESCE(NULLIF(fp.H10_out, 0), 0) AS `H+10`,
+          COALESCE(NULLIF(fp.H11_out, 0), 0) AS `H+11`,
+          COALESCE(NULLIF(fp.H12_out, 0), 0) AS `H+12`,
+          COALESCE(NULLIF(fp.H13_out, 0), 0) AS `H+13`,
+          COALESCE(NULLIF(fp.H14_out, 0), 0) AS `H+14`,
+          COALESCE(NULLIF(fp.H15_out, 0), 0) AS `H+15`,
+          COALESCE(NULLIF(fp.H16_out, 0), 0) AS `H+16`,
+          COALESCE(NULLIF(fp.H17_out, 0), 0) AS `H+17`,
+          COALESCE(NULLIF(fp.H18_out, 0), 0) AS `H+18`,
+          COALESCE(NULLIF(fp.H19_out, 0), 0) AS `H+19`,
+          COALESCE(NULLIF(fp.H20_out, 0), 0) AS `H+20`,
+          COALESCE(NULLIF(fp.H21_out, 0), 0) AS `H+21`,
+          COALESCE(NULLIF(fp.H22_out, 0), 0) AS `H+22`,
+          COALESCE(NULLIF(fp.H23_out, 0), 0) AS `H+23`,
+          COALESCE(NULLIF(fp.H24_out, 0), 0) AS `H+24`,
+          COALESCE(NULLIF(fp.H25_out, 0), 0) AS `H+25`,
+          COALESCE(NULLIF(fp.H26_out, 0), 0) AS `H+26`,
+          COALESCE(NULLIF(fp.H27_out, 0), 0) AS `H+27`,
+          COALESCE(NULLIF(fp.H28_out, 0), 0) AS `H+28`,
+          COALESCE(NULLIF(fp.H29_out, 0), 0) AS `H+29`,
+          COALESCE(NULLIF(fp.H30_out, 0), 0) AS `H+30`,
+          ROW_NUMBER() OVER() AS row_num
+      FROM 
+          CurrentDayCashFlow cdcf
+      LEFT JOIN 
+          FutureProjections fp ON TRUE
+    )
+    WHERE row_num = 1
+
+  ORDER BY CASE WHEN ArusKas = 'Arus Kas Masuk' THEN 1 ELSE 2 END
+),
+query_3 AS (
+  WITH WorkingDays AS (
+    SELECT 
+      PARSE_DATE('%Y%m%d', CAST(BAS_DT AS STRING)) AS BAS_DT,
+      NAT_HLDY_DSCD
+    FROM 
+      focal-eon-426807-s6.lomba.Ref_HariLibur
+    WHERE 
+      NAT_HLDY_DSCD = 0  -- 0 indicates a working day
+  ),
+
+  CurrentDayCashFlow AS (
+    SELECT 
+      '02.03.00.00.00.00' AS Ref,
+      'Deposito' AS Pos,
+      ABS(SUM(dsgb.equivalent_amount)) AS H
+    FROM 
+      focal-eon-426807-s6.lomba.daily_summary_gl_balance dsgb
+    JOIN 
+      focal-eon-426807-s6.lomba.ref_proyeksi_funding_list_gl pfl
+    ON 
+      dsgb.gl_acc = pfl.COA
+    WHERE 
+      pfl.TAG = 'Deposito'
+  ),
+
+  FutureProjections AS (
+    SELECT 
+      dep.id,
+      -- Arus Kas Masuk (arus_kas = 1)
+      SUM(CASE 
+            WHEN
+                EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY))
+            THEN 0
+            ELSE 0 
+          END) AS H1,
+          
+      SUM(CASE 
+                WHEN
+                EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY))
+            THEN 0
+            ELSE 0 
+              END) AS H2,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H3,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H4,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H5,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H6,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H7,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H8,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H9,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H10,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H11,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H12,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H13,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H14,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H15,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H16,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H17,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H18,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H19,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H20,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H21,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H22,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H23,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H24,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H25,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H26,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H27,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H28,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H29,
+
+      SUM(CASE 
+                WHEN dep.ACCOUNTSTATE = 'ACTIVE'
+                    AND dep._REKENING_REKENINGNOMORREKENINGDEBET <> 27920010
+                    AND dep._REKENING_REKENINGTANGGALJATOHTEMPO = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY)
+                    AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY))
+                THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+                ELSE 0 
+              END) AS H30,
+
+      -- Arus Kas Keluar (arus_kas = 0)
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 1
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 1 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H1_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 2
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 2 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H2_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 3
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 3 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H3_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 4
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 4 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H4_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 5
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 5 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H5_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 6
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 6 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H6_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 7
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 7 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H7_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 8
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 8 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H8_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 9
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 9 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H9_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 10
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 10 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H10_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 11
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 11 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H11_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 12
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 12 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H12_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 13
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 13 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H13_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 14
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 14 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H14_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 15
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 15 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H15_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 16
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 16 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H16_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 17
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 17 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H17_out,
+
+          SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 18
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 18 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H18_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 19
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 19 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H19_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 20
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 20 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H20_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 21
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 21 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H21_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 22
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 22 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H22_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 23
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 23 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H23_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 24
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 24 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H24_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 25
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 25 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H25_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 26
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 26 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H26_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 27
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 27 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H27_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 28
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 28 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H28_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 29
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 29 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H29_out,
+
+      SUM(CASE 
+              WHEN dep.ACCOUNTSTATE IN ('ACTIVE', 'CLOSED')
+                  AND DATE_DIFF(dep._REKENING_REKENINGTANGGALJATOHTEMPO, CURRENT_DATE('Asia/Jakarta'), DAY) = 30
+                  AND EXISTS (SELECT 1 FROM WorkingDays WHERE BAS_DT = DATE_ADD(CURRENT_DATE('Asia/Jakarta'), INTERVAL 30 DAY))
+              THEN dep._REKENING_REKENINGPRINCIPALAMOUNT
+              ELSE 0 
+          END) AS H30_out
+    FROM 
+      focal-eon-426807-s6.lomba.deposits dep
+    GROUP BY dep.id
+  )
+
+  -- Use ROW_NUMBER to select only one row for each cash flow type
+  SELECT 
+      `No`,
+      Ref,
+      Pos,
+      H,
+      ArusKas,
+      ` `,
+      `H+1`, `H+2`, `H+3`, `H+4`, `H+5`, `H+6`, `H+7`, `H+8`, 
+      `H+9`, `H+10`, `H+11`, `H+12`, `H+13`, `H+14`, `H+15`, `H+16`,
+      `H+17`, `H+18`, `H+19`, `H+20`, `H+21`, `H+22`, `H+23`, `H+24`,
+      `H+25`, `H+26`, `H+27`, `H+28`, `H+29`, `H+30`
+  FROM (
+      SELECT
+          5 AS `No`, 
+          cdcf.Ref,
+          cdcf.Pos,
+          cdcf.H,
+          'Arus Kas Masuk' AS ArusKas,
+          'I' AS ` `,
+          COALESCE(NULLIF(fp.H1, 0), cdcf.H) AS `H+1`,
+          COALESCE(NULLIF(fp.H2, 0), cdcf.H) AS `H+2`,
+          COALESCE(NULLIF(fp.H3, 0), cdcf.H) AS `H+3`,
+          COALESCE(NULLIF(fp.H4, 0), cdcf.H) AS `H+4`,
+          COALESCE(NULLIF(fp.H5, 0), cdcf.H) AS `H+5`,
+          COALESCE(NULLIF(fp.H6, 0), cdcf.H) AS `H+6`,
+          COALESCE(NULLIF(fp.H7, 0), cdcf.H) AS `H+7`,
+          COALESCE(NULLIF(fp.H8, 0), cdcf.H) AS `H+8`,
+          COALESCE(NULLIF(fp.H9, 0), cdcf.H) AS `H+9`,
+          COALESCE(NULLIF(fp.H10, 0), cdcf.H) AS `H+10`,
+          COALESCE(NULLIF(fp.H11, 0), cdcf.H) AS `H+11`,
+          COALESCE(NULLIF(fp.H12, 0), cdcf.H) AS `H+12`,
+          COALESCE(NULLIF(fp.H13, 0), cdcf.H) AS `H+13`,
+          COALESCE(NULLIF(fp.H14, 0), cdcf.H) AS `H+14`,
+          COALESCE(NULLIF(fp.H15, 0), cdcf.H) AS `H+15`,
+          COALESCE(NULLIF(fp.H16, 0), cdcf.H) AS `H+16`,
+          COALESCE(NULLIF(fp.H17, 0), cdcf.H) AS `H+17`,
+          COALESCE(NULLIF(fp.H18, 0), cdcf.H) AS `H+18`,
+          COALESCE(NULLIF(fp.H19, 0), cdcf.H) AS `H+19`,
+          COALESCE(NULLIF(fp.H20, 0), cdcf.H) AS `H+20`,
+          COALESCE(NULLIF(fp.H21, 0), cdcf.H) AS `H+21`,
+          COALESCE(NULLIF(fp.H22, 0), cdcf.H) AS `H+22`,
+          COALESCE(NULLIF(fp.H23, 0), cdcf.H) AS `H+23`,
+          COALESCE(NULLIF(fp.H24, 0), cdcf.H) AS `H+24`,
+          COALESCE(NULLIF(fp.H25, 0), cdcf.H) AS `H+25`,
+          COALESCE(NULLIF(fp.H26, 0), cdcf.H) AS `H+26`,
+          COALESCE(NULLIF(fp.H27, 0), cdcf.H) AS `H+27`,
+          COALESCE(NULLIF(fp.H28, 0), cdcf.H) AS `H+28`,
+          COALESCE(NULLIF(fp.H29, 0), cdcf.H) AS `H+29`,
+          COALESCE(NULLIF(fp.H30, 0), cdcf.H) AS `H+30`,
+          ROW_NUMBER() OVER() AS row_num
+      FROM 
+          CurrentDayCashFlow cdcf
+      LEFT JOIN 
+          FutureProjections fp ON TRUE
+  )
+  WHERE row_num = 1
+
+  UNION ALL
+
+  SELECT 
+      `No`,
+      Ref,
+      Pos,
+      H,
+      ArusKas,
+      ` `,
+      `H+1`, `H+2`, `H+3`, `H+4`, `H+5`, `H+6`, `H+7`, `H+8`, 
+      `H+9`, `H+10`, `H+11`, `H+12`, `H+13`, `H+14`, `H+15`, `H+16`,
+      `H+17`, `H+18`, `H+19`, `H+20`, `H+21`, `H+22`, `H+23`, `H+24`,
+      `H+25`, `H+26`, `H+27`, `H+28`, `H+29`, `H+30`
+  FROM (
+      SELECT 
+          6 AS `No`,
+          cdcf.Ref,
+          cdcf.Pos,
+          0 AS H,  -- Set H to 0 for "Arus Kas Keluar"
+          'Arus Kas Keluar' AS ArusKas,
+          'O' AS ` `,
+          COALESCE(NULLIF(fp.H1_out, 0), 0) AS `H+1`,
+          COALESCE(NULLIF(fp.H2_out, 0), 0) AS `H+2`,
+          COALESCE(NULLIF(fp.H3_out, 0), 0) AS `H+3`,
+          COALESCE(NULLIF(fp.H4_out, 0), 0) AS `H+4`,
+          COALESCE(NULLIF(fp.H5_out, 0), 0) AS `H+5`,
+          COALESCE(NULLIF(fp.H6_out, 0), 0) AS `H+6`,
+          COALESCE(NULLIF(fp.H7_out, 0), 0) AS `H+7`,
+          COALESCE(NULLIF(fp.H8_out, 0), 0) AS `H+8`,
+          COALESCE(NULLIF(fp.H9_out, 0), 0) AS `H+9`,
+          COALESCE(NULLIF(fp.H10_out, 0), 0) AS `H+10`,
+          COALESCE(NULLIF(fp.H11_out, 0), 0) AS `H+11`,
+          COALESCE(NULLIF(fp.H12_out, 0), 0) AS `H+12`,
+          COALESCE(NULLIF(fp.H13_out, 0), 0) AS `H+13`,
+          COALESCE(NULLIF(fp.H14_out, 0), 0) AS `H+14`,
+          COALESCE(NULLIF(fp.H15_out, 0), 0) AS `H+15`,
+          COALESCE(NULLIF(fp.H16_out, 0), 0) AS `H+16`,
+          COALESCE(NULLIF(fp.H17_out, 0), 0) AS `H+17`,
+          COALESCE(NULLIF(fp.H18_out, 0), 0) AS `H+18`,
+          COALESCE(NULLIF(fp.H19_out, 0), 0) AS `H+19`,
+          COALESCE(NULLIF(fp.H20_out, 0), 0) AS `H+20`,
+          COALESCE(NULLIF(fp.H21_out, 0), 0) AS `H+21`,
+          COALESCE(NULLIF(fp.H22_out, 0), 0) AS `H+22`,
+          COALESCE(NULLIF(fp.H23_out, 0), 0) AS `H+23`,
+          COALESCE(NULLIF(fp.H24_out, 0), 0) AS `H+24`,
+          COALESCE(NULLIF(fp.H25_out, 0), 0) AS `H+25`,
+          COALESCE(NULLIF(fp.H26_out, 0), 0) AS `H+26`,
+          COALESCE(NULLIF(fp.H27_out, 0), 0) AS `H+27`,
+          COALESCE(NULLIF(fp.H28_out, 0), 0) AS `H+28`,
+          COALESCE(NULLIF(fp.H29_out, 0), 0) AS `H+29`,
+          COALESCE(NULLIF(fp.H30_out, 0), 0) AS `H+30`,
+          ROW_NUMBER() OVER() AS row_num
+      FROM 
+          CurrentDayCashFlow cdcf
+      LEFT JOIN 
+          FutureProjections fp ON TRUE
+    )
+    WHERE row_num = 1
+
+  ORDER BY CASE WHEN ArusKas = 'Arus Kas Masuk' THEN 1 ELSE 2 END
+)
+
+
+
+
+SELECT * FROM query_1
+UNION ALL
+SELECT * FROM query_2
+UNION ALL
+SELECT * FROM query_3
+ORDER BY 1; -- Optionally order by the first column or any other column
